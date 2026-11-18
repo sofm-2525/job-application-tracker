@@ -38,7 +38,7 @@ companies ──< jobs ──< applications
 
 ### 1. Requirements
 
-- Python 3.10 or newer
+- Python 3.9 or newer
 - MySQL Server 8.0 or newer (and MySQL Workbench, optional)
 
 ### 2. Create the database
