@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ mode }} company{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('companies') }}">Companies</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ mode }}</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-3">{{ mode }} company</h1>
+
+<div class="card form-card">
+    <div class="card-body">
+        <form method="post" novalidate>
+            <div class="mb-3">
+                <label for="company_name" class="form-label">Company name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company_name" name="company_name" maxlength="100" required
+                       value="{{ form.company_name or '' }}">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="industry" class="form-label">Industry</label>
+                    <input type="text" class="form-control" id="industry" name="industry" maxlength="50"
+                           value="{{ form.industry or '' }}" placeholder="e.g. Technology">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="website" class="form-label">Website</label>
+                    <input type="text" class="form-control" id="website" name="website" maxlength="200"
+                           value="{{ form.website or '' }}" placeholder="www.example.com">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city" maxlength="50" value="{{ form.city or '' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="state" class="form-label">State</label>
+                    <input type="text" class="form-control" id="state" name="state" maxlength="50" value="{{ form.state or '' }}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3">{{ form.notes or '' }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ 'Add company' if mode == 'Add' else 'Save changes' }}</button>
+            <a href="{{ url_for('company_detail', company_id=company_id) if company_id else url_for('companies') }}"
+               class="btn btn-link">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

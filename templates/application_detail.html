@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "_macros.html" import delete_button, status_badge %}
+{% block title %}Application{% endblock %}
+{% block content %}
+{% set a = application %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('applications') }}">Applications</a></li>
+        <li class="breadcrumb-item active" aria-current="page">#{{ a.application_id }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
+    <div>
+        <h1 class="h3 mb-1">
+            {% if a.job_id %}<a href="{{ url_for('job_detail', job_id=a.job_id) }}" class="text-reset">{{ a.job_title }}</a>
+            {% else %}Unknown job{% endif %}
+        </h1>
+        <div class="text-muted">
+            {% if a.company_id %}<a href="{{ url_for('company_detail', company_id=a.company_id) }}">{{ a.company_name }}</a>{% endif %}
+            · {{ status_badge(a.status) }}
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('application_edit', application_id=a.application_id) }}" class="btn btn-outline-secondary">Edit</a>
+        {{ delete_button(url_for('application_delete', application_id=a.application_id),
+                         'this application for ' ~ (a.job_title or 'this job')) }}
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title mb-3">Application</h2>
+                <dl class="row mb-0">
+                    <dt class="col-6">Date applied</dt>
+                    <dd class="col-6">{{ a.application_date|datefmt }}</dd>
+                    <dt class="col-6">Status</dt>
+                    <dd class="col-6">{{ a.status }}</dd>
+                    <dt class="col-6">Resume version</dt>
+                    <dd class="col-6">{{ a.resume_version or '—' }}</dd>
+                    <dt class="col-6">Cover letter sent</dt>
+                    <dd class="col-6 mb-0">{{ 'Yes' if a.cover_letter_sent else 'No' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title mb-3">Interview details</h2>
+                {% set i = a.interview %}
+                {% if i %}
+                <dl class="row mb-0">
+                    <dt class="col-5">Round</dt><dd class="col-7">{{ i.get('round', '—') }}</dd>
+                    <dt class="col-5">Type</dt><dd class="col-7">{{ i.get('type', '—') }}</dd>
+                    <dt class="col-5">Date</dt><dd class="col-7">{{ i.get('date')|datefmt }}</dd>
+                    <dt class="col-5">Interviewer</dt><dd class="col-7">{{ i.get('interviewer', '—') }}</dd>
+                    <dt class="col-5">Notes</dt><dd class="col-7 mb-0 preserve-lines">{{ i.get('notes', '—') }}</dd>
+                </dl>
+                {% else %}
+                <p class="text-muted mb-0">No interview details yet.
+                    <a href="{{ url_for('application_edit', application_id=a.application_id) }}">Add them</a>.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

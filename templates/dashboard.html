@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, salary_range %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <h1 class="h3 mb-0">Dashboard</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('application_add') }}" class="btn btn-primary">+ New application</a>
+        <a href="{{ url_for('job_match') }}" class="btn btn-outline-primary">Find matching jobs</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    {% for label, key, endpoint in [('Companies', 'companies', 'companies'), ('Jobs', 'jobs', 'jobs'),
+                                     ('Applications', 'applications', 'applications'), ('Contacts', 'contacts', 'contacts')] %}
+    <div class="col-6 col-lg-3">
+        <a href="{{ url_for(endpoint) }}" class="card stat-card h-100 text-decoration-none">
+            <div class="card-body">
+                <div class="stat-label">{{ label }}</div>
+                <div class="stat-value">{{ counts[key] }}</div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title mb-3">Applications by status</h2>
+                {% set total = counts['applications'] %}
+                {% for status, n in by_status.items() %}
+                <a class="status-row text-decoration-none" href="{{ url_for('applications', status=status) }}">
+                    <span class="status-name">{{ status_badge(status) }}</span>
+                    <span class="status-bar-track">
+                        <span class="status-bar status-bg-{{ status|lower }}"
+                              style="width: {{ (n / total * 100) if total else 0 }}%"></span>
+                    </span>
+                    <span class="status-count">{{ n }}</span>
+                </a>
+                {% endfor %}
+                <p class="text-muted small mt-3 mb-0">
+                    Response rate: <strong>{{ response_rate }}%</strong>
+                    (applications that moved past "Applied")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h6 card-title mb-3">Recent applications</h2>
+                {% if recent %}
+                <ul class="list-group list-group-flush">
+                    {% for a in recent %}
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{{ url_for('application_detail', application_id=a.application_id) }}">
+                                {{ a.job_title or 'Unknown job' }}</a>
+                            <div class="text-muted small">{{ a.company_name or '—' }} · {{ a.application_date|datefmt }}</div>
+                        </div>
+                        {{ status_badge(a.status) }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">No applications yet. <a href="{{ url_for('application_add') }}">Add your first one</a>.</p>
+                {% endif %}
+                <hr>
+                <p class="text-muted small mb-0">
+                    Average salary range across all jobs:
+                    <strong>{{ salary_range(salary.avg_min, salary.avg_max) }}</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_macros.html" import salary_range, skill_chips %}
+{% block title %}Job Match{% endblock %}
+{% block content %}
+<h1 class="h3 mb-1">Job Match</h1>
+<p class="text-muted mb-3">Enter your skills to see jobs ranked by the percentage of their required skills you have.</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" id="match-form">
+            <label for="skills" class="form-label fw-semibold">Your skills</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="skills" name="skills" value="{{ skills_text }}"
+                       placeholder="Python, SQL, Flask" autofocus>
+                <button class="btn btn-primary" type="submit">Find matches</button>
+            </div>
+            <div class="form-text">Separate skills with commas. Upper/lower case doesn't matter.</div>
+        </form>
+        {% if all_skills %}
+        <div class="mt-3">
+            <span class="small text-muted me-1">Skills in the job listings (click to add):</span>
+            {% for skill in all_skills %}
+            <button type="button" class="skill-chip skill-chip-button" data-skill="{{ skill }}">{{ skill }}</button>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if results is not none %}
+    <h2 class="h5 mb-3">
+        Your skills: <span class="fw-normal">{{ user_skills|join(', ') }}</span>
+    </h2>
+    {% if results %}
+    <h3 class="h6 text-muted mb-2">Matching jobs ({{ results|length }})</h3>
+    <div class="d-flex flex-column gap-3">
+        {% for r in results %}
+        <div class="card match-card">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <div class="match-rank">{{ loop.index }}.</div>
+                        <a href="{{ url_for('job_detail', job_id=r.job.job_id) }}" class="h6 mb-0">{{ r.job.job_title }}</a>
+                        <span class="text-muted">at {{ r.job.company_name or 'Unknown company' }}</span>
+                        <div class="small text-muted">
+                            {{ r.job.job_type or '' }}{% if r.job.job_type %} · {% endif %}{{ salary_range(r.job.salary_min, r.job.salary_max) }}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="match-percent {{ 'match-high' if r.percent >= 75 else ('match-mid' if r.percent >= 50 else 'match-low') }}">
+                            {{ r.percent }}%</div>
+                        <div class="small text-muted">{{ r.matched|length }}/{{ r.required_count }} skills</div>
+                    </div>
+                </div>
+                <div class="progress match-progress mt-2" role="progressbar" aria-valuenow="{{ r.percent }}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar {{ 'match-bar-high' if r.percent >= 75 else ('match-bar-mid' if r.percent >= 50 else 'match-bar-low') }}"
+                         style="width: {{ r.percent }}%"></div>
+                </div>
+                <div class="mt-2 small">
+                    <span class="text-muted">You have:</span> {{ skill_chips(r.matched, 'chip-have') }}
+                </div>
+                {% if r.missing %}
+                <div class="mt-1 small">
+                    <span class="text-muted">Missing:</span> {{ skill_chips(r.missing, 'chip-missing') }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">No jobs match those skills yet. Try adding more skills, or check the spelling.</div>
+    {% endif %}
+{% endif %}
+
+<script>
+    // Clicking a suggested skill adds it to the box (if it isn't already there)
+    document.querySelectorAll('.skill-chip-button').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const input = document.getElementById('skills');
+            const current = input.value.split(',').map(s => s.trim()).filter(Boolean);
+            const skill = button.dataset.skill;
+            if (!current.some(s => s.toLowerCase() === skill.toLowerCase())) {
+                current.push(skill);
+            }
+            input.value = current.join(', ');
+            input.focus();
+        });
+    });
+</script>
+{% endblock %}

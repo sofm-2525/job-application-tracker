@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_macros.html" import delete_button, status_badge %}
+{% block title %}Applications{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h3 mb-0">Applications</h1>
+    <a href="{{ url_for('application_add') }}" class="btn btn-primary">+ Add application</a>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{{ url_for('applications') }}" class="btn btn-sm {{ 'btn-dark' if not status else 'btn-outline-dark' }}">All</a>
+    {% for s in STATUSES %}
+    <a href="{{ url_for('applications', status=s) }}" class="btn btn-sm {{ 'btn-dark' if status == s else 'btn-outline-dark' }}">{{ s }}</a>
+    {% endfor %}
+</div>
+
+{% if applications %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th>Job</th>
+                <th>Company</th>
+                <th>Applied</th>
+                <th>Status</th>
+                <th>Resume</th>
+                <th class="text-center">Cover letter</th>
+                <th>Interview</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for a in applications %}
+            <tr>
+                <td><a href="{{ url_for('application_detail', application_id=a.application_id) }}" class="fw-semibold">
+                    {{ a.job_title or 'Unknown job' }}</a></td>
+                <td>{{ a.company_name or '—' }}</td>
+                <td class="text-nowrap">{{ a.application_date|datefmt }}</td>
+                <td>{{ status_badge(a.status) }}</td>
+                <td>{{ a.resume_version or '—' }}</td>
+                <td class="text-center">{{ '✓' if a.cover_letter_sent else '—' }}</td>
+                <td class="text-nowrap small">
+                    {% if a.interview %}
+                        {{ a.interview.get('type', 'Interview') }}{% if a.interview.get('date') %} · {{ a.interview['date']|datefmt }}{% endif %}
+                    {% else %}—{% endif %}
+                </td>
+                <td class="text-end text-nowrap">
+                    <a href="{{ url_for('application_edit', application_id=a.application_id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    {{ delete_button(url_for('application_delete', application_id=a.application_id),
+                                     'this application for ' ~ (a.job_title or 'this job')) }}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    {% if status %}No applications with status "{{ status }}".{% else %}No applications yet.{% endif %}
+    <a href="{{ url_for('application_add') }}">Add an application</a>.
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ mode }} application{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('applications') }}">Applications</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ mode }}</li>
+    </ol>
+</nav>
+<h1 class="h3 mb-3">{{ mode }} application</h1>
+
+{% if not jobs %}
+<div class="alert alert-warning">
+    You need at least one job before adding an application. <a href="{{ url_for('job_add') }}">Add a job</a>.
+</div>
+{% endif %}
+
+<div class="card form-card">
+    <div class="card-body">
+        <form method="post" novalidate>
+            <div class="mb-3">
+                <label for="job_id" class="form-label">Job <span class="text-danger">*</span></label>
+                <select class="form-select" id="job_id" name="job_id" required>
+                    <option value="">Choose a job…</option>
+                    {% for j in jobs %}
+                    <option value="{{ j.job_id }}" {% if form.job_id|string == j.job_id|string %}selected{% endif %}>
+                        {{ j.job_title }} — {{ j.company_name or 'No company' }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="application_date" class="form-label">Date applied <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="application_date" name="application_date" required
+                           value="{{ form.application_date or '' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        {% for s in STATUSES %}
+                        <option value="{{ s }}" {% if (form.status or 'Applied') == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="resume_version" class="form-label">Resume version</label>
+                    <input type="text" class="form-control" id="resume_version" name="resume_version" maxlength="50"
+                           value="{{ form.resume_version or '' }}" placeholder="v2.0">
+                </div>
+            </div>
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="cover_letter_sent" name="cover_letter_sent"
+                       {% if form.cover_letter_sent %}checked{% endif %}>
+                <label class="form-check-label" for="cover_letter_sent">Cover letter sent</label>
+            </div>
+
+            <fieldset class="border rounded p-3 mb-3">
+                <legend class="h6 float-none w-auto px-2 mb-0">Interview details <span class="text-muted fw-normal">(optional)</span></legend>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="interview_round" class="form-label">Round</label>
+                        <input type="number" class="form-control" id="interview_round" name="interview_round" min="1"
+                               value="{{ form.interview_round or '' }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="interview_type" class="form-label">Type</label>
+                        <select class="form-select" id="interview_type" name="interview_type">
+                            <option value="">—</option>
+                            {% for t in INTERVIEW_TYPES %}
+                            <option value="{{ t }}" {% if form.interview_type == t %}selected{% endif %}>{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label for="interview_date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="interview_date" name="interview_date"
+                               value="{{ form.interview_date or '' }}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="interviewer" class="form-label">Interviewer</label>
+                    <input type="text" class="form-control" id="interviewer" name="interviewer"
+                           value="{{ form.interviewer or '' }}">
+                </div>
+                <div>
+                    <label for="interview_notes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="interview_notes" name="interview_notes" rows="2">{{ form.interview_notes or '' }}</textarea>
+                </div>
+                <div class="form-text">Saved together in the <code>interview_data</code> JSON column.</div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">{{ 'Add application' if mode == 'Add' else 'Save changes' }}</button>
+            <a href="{{ url_for('application_detail', application_id=application_id) if application_id else url_for('applications') }}"
+               class="btn btn-link">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

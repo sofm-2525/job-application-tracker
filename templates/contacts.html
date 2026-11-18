@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_macros.html" import delete_button %}
+{% block title %}Contacts{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h3 mb-0">Contacts</h1>
+    <a href="{{ url_for('contact_add') }}" class="btn btn-primary">+ Add contact</a>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+    <div class="col-sm-8 col-md-6">
+        <input type="search" name="q" value="{{ search }}" class="form-control" placeholder="Search by name, company or title">
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+        {% if search %}<a href="{{ url_for('contacts') }}" class="btn btn-link">Clear</a>{% endif %}
+    </div>
+</form>
+
+{% if contacts %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ct in contacts %}
+            <tr>
+                <td><a href="{{ url_for('contact_detail', contact_id=ct.contact_id) }}" class="fw-semibold">{{ ct.contact_name }}</a></td>
+                <td>{{ ct.title or '—' }}</td>
+                <td>{{ ct.company_name or '—' }}</td>
+                <td>{% if ct.email %}<a href="mailto:{{ ct.email }}">{{ ct.email }}</a>{% else %}—{% endif %}</td>
+                <td class="text-nowrap">{{ ct.phone or '—' }}</td>
+                <td class="text-end text-nowrap">
+                    <a href="{{ url_for('contact_edit', contact_id=ct.contact_id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    {{ delete_button(url_for('contact_delete', contact_id=ct.contact_id), ct.contact_name) }}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    {% if search %}No contacts match "{{ search }}".{% else %}No contacts yet.{% endif %}
+    <a href="{{ url_for('contact_add') }}">Add a contact</a>.
+</div>
+{% endif %}
+{% endblock %}

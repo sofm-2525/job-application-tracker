@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import delete_button, salary_range, skill_chips, status_badge %}
+{% block title %}{{ job.job_title }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('jobs') }}">Jobs</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ job.job_title }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
+    <div>
+        <h1 class="h3 mb-1">{{ job.job_title }}</h1>
+        <div class="text-muted">
+            {% if job.company_id %}
+                <a href="{{ url_for('company_detail', company_id=job.company_id) }}">{{ job.company_name }}</a>
+            {% else %}No company{% endif %}
+            {% if job.job_type %} · {{ job.job_type }}{% endif %}
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('job_edit', job_id=job.job_id) }}" class="btn btn-outline-secondary">Edit</a>
+        {{ delete_button(url_for('job_delete', job_id=job.job_id), job.job_title,
+                         ' This also deletes its applications.' if applications else '') }}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Salary</dt>
+            <dd class="col-sm-9">{{ salary_range(job.salary_min, job.salary_max) }}</dd>
+            <dt class="col-sm-3">Date posted</dt>
+            <dd class="col-sm-9">{{ job.date_posted|datefmt }}</dd>
+            <dt class="col-sm-3">Job posting</dt>
+            <dd class="col-sm-9">
+                {% if job.job_url %}
+                    <a href="{{ job.job_url if job.job_url.startswith('http') else 'https://' ~ job.job_url }}"
+                       target="_blank" rel="noopener">{{ job.job_url }}</a>
+                {% else %}—{% endif %}
+            </dd>
+            <dt class="col-sm-3">Required skills</dt>
+            <dd class="col-sm-9 mb-0">{{ skill_chips(job.skills) if job.skills else '—' }}</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h5 mb-0">Applications ({{ applications|length }})</h2>
+    <a href="{{ url_for('application_add', job_id=job.job_id) }}" class="btn btn-sm btn-primary">+ Apply to this job</a>
+</div>
+{% if applications %}
+<div class="card">
+    <ul class="list-group list-group-flush">
+        {% for a in applications %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('application_detail', application_id=a.application_id) }}">
+                Applied {{ a.application_date|datefmt }}</a>
+            {{ status_badge(a.status) }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% else %}
+<p class="text-muted">You haven't applied to this job yet.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{# Reusable pieces shared by several pages #}
+
+{# Status badge, colored by application status #}
+{% macro status_badge(status) -%}
+    <span class="badge status-badge status-{{ (status or 'Applied')|lower }}">{{ status or 'Applied' }}</span>
+{%- endmacro %}
+
+{# Delete button that asks for confirmation before submitting #}
+{% macro delete_button(action_url, what, extra='') -%}
+    <form action="{{ action_url }}" method="post" class="d-inline"
+          onsubmit="return confirm('Delete {{ what|replace("'", "") }}?{{ extra|replace("'", "") }} This cannot be undone.');">
+        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+    </form>
+{%- endmacro %}
+
+{# Salary range like "$70,000 – $90,000" #}
+{% macro salary_range(min_value, max_value) -%}
+    {%- if min_value is none and max_value is none -%}—
+    {%- elif max_value is none -%}{{ min_value|money }}+
+    {%- elif min_value is none -%}up to {{ max_value|money }}
+    {%- else -%}{{ min_value|money }} – {{ max_value|money }}{%- endif -%}
+{%- endmacro %}
+
+{# Skill chips from a list #}
+{% macro skill_chips(skills, css='') -%}
+    {% for skill in skills %}<span class="skill-chip {{ css }}">{{ skill }}</span>{% endfor %}
+{%- endmacro %}
