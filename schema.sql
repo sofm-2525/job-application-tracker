@@ -1,10 +1,3 @@
--- =====================================================
--- Job Application Tracker - schema.sql
--- Recreates the job_tracker database from scratch.
--- Run the whole file once in MySQL Workbench:
---   File > Open SQL Script... then the lightning bolt (Execute All)
--- WARNING: this deletes any existing job_tracker database.
--- =====================================================
 
 DROP DATABASE IF EXISTS job_tracker;
 CREATE DATABASE job_tracker;
