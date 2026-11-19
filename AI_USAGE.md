@@ -1,7 +1,5 @@
 # AI Usage Documentation
 
-> ✏️ **Draft — review and edit before submitting.** Sections marked **TODO** need your own words.
-> Delete this note when you're done.
 
 ## Tools Used
 
